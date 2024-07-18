@@ -14,6 +14,12 @@ io.on("connection",function(socket){
         let name = unames[index];
         io.emit("message",{message,name,id:socket.id});
     })
+    socket.on("typing",function(){
+        let index = userids.indexOf(socket.id);
+        let name = unames[index];
+
+        socket.broadcast.emit("typing",{name});
+    })
     socket.on("uname",function(name){
         unames.push(name);
         userids.push(socket.id);

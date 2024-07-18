@@ -33,19 +33,22 @@
             <input type="button" value="Submit" class="namebtn font-semibold mt-2 px-5 py-2 rounded-xl bg-blue-100" />
         </div>
     </div>
-    <div class="w-full max-w-lg">
+    <div class="w-10/12">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             <div class="bg-blue-500 p-4 flex justify-between align-center">
-                <h2 class="text-white text-xl">Chat Room</h2>
-                <div class="namediv">
-                    <h2 class="text-white text-xl">
-                        <span class="no text-black font-semibold">${number}</span> are live.
-                    </h2>
+                <div class="flex gap-4 items-center">
+                    <h2 class="text-white text-3xl">Chat Room</h2>
+                    <div class="namediv">
+                        <h2 class="text-white text-lg">
+                            <span class="no text-black font-semibold">${number}</span> are live.
+                        </h2>
+                    </div>
                 </div>
+                <h3 class="typing italic text-sm opacity-50 tracking-tight"></h3>
                 <div class="namediv">
-                    <h2 class="text-white text-xl">
-                        <span class="sptg text-black font-semibold">${uname}</span> is chatting. <a
-                        href="/" class="reset px-4 py-1 bg-red-900 text-white rounded-lg">reset</a>
+                    <h2 class="text-white text-lg">
+                        <span class="sptg text-black font-semibold">${uname}</span> is chatting. <a href="/"
+                            class="reset px-4 py-1 bg-red-900 text-white rounded-lg">reset</a>
                     </h2>
                 </div>
             </div>
@@ -71,10 +74,23 @@
         crossorigin="anonymous"></script>
     <script>
         const socket = io();
+        let timer;
         const input = document.querySelector(".input");
         const messages = document.querySelector(".messages");
         const inptname = document.querySelector(".nameinpt");
         const inptbtn = document.querySelector(".namebtn");
+
+        input.addEventListener("input", function (e) {
+            socket.emit("typing");
+        })
+
+        socket.on("typing", function (name) {
+            document.querySelector(".typing").textContent = `${name.name} is typing...`;
+            clearTimeout(timer);
+            timer = setTimeout(function(){
+                document.querySelector(".typing").textContent = "";
+            },1200);
+        })
 
         document.querySelector(".send").addEventListener("click", function () {
             socket.emit("message", input.value);
@@ -93,15 +109,15 @@
             }
         })
 
-        socket.on("countofpeople",function(count){
+        socket.on("countofpeople", function (count) {
             document.querySelector(".no").innerHTML = count;
         })
 
-        inptbtn.addEventListener("click",function(){
-            socket.emit("uname",inptname.value);
+        inptbtn.addEventListener("click", function () {
+            socket.emit("uname", inptname.value);
         })
-        
-        socket.on("setnamedone",function(){
+
+        socket.on("setnamedone", function () {
             document.querySelector(".namedivv").style.display = "none";
             document.querySelector(".sptg").innerHTML = inptname.value;
         })
