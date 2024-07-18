@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .inputs {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            z-index: 999;
+            background-color: rgba(128, 234, 255, 0.836);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body class="bg-blue-100 flex items-center justify-center h-screen">
+    <div class="namedivv h-screen w-full fixed bg-white">
+        <div class="inputs">
+            <input type="text" placeholder="Enter Your Name" required name="uname"
+                class="nameinpt px-5 py-2 rounded-md" />
+            <input type="button" value="Submit" class="namebtn font-semibold mt-2 px-5 py-2 rounded-xl bg-blue-100" />
+        </div>
+    </div>
+    <div class="w-full max-w-lg">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-blue-500 p-4 flex justify-between align-center">
+                <h2 class="text-white text-xl">Chat Room</h2>
+                <div class="namediv">
+                    <h2 class="text-white text-xl">
+                        <span class="no text-black font-semibold">${number}</span> are live.
+                    </h2>
+                </div>
+                <div class="namediv">
+                    <h2 class="text-white text-xl">
+                        <span class="sptg text-black font-semibold">${uname}</span> is chatting. <a
+                        href="/" class="reset px-4 py-1 bg-red-900 text-white rounded-lg">reset</a>
+                    </h2>
+                </div>
+            </div>
+            <div class="messages p-4 h-96 overflow-y-auto">
+                <!-- <div class="mb-4">
+                    <div class="flex items-end">
+                        <div class="bg-blue-500 text-white p-2 rounded-lg max-w-xs">
+                            <p>Hello! How are you?</p>
+                        </div>
+                    </div>
+                </div> -->
+
+            </div>
+            <div class="p-4 bg-gray-100 flex">
+                <input class="input w-full p-2 rounded-l-lg border border-gray-300" type="text"
+                    placeholder="Type a message...">
+                <button class="send bg-blue-500 text-white p-2 rounded-r-lg">Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script>
+        const socket = io();
+        const input = document.querySelector(".input");
+        const messages = document.querySelector(".messages");
+        const inptname = document.querySelector(".nameinpt");
+        const inptbtn = document.querySelector(".namebtn");
+
+        document.querySelector(".send").addEventListener("click", function () {
+            socket.emit("message", input.value);
+        })
+        input.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                if (event.shiftKey) {
+                    const cursorPos = this.selectionStart;
+                    this.value = this.value.slice(0, cursorPos) + "\n" + this.value.slice(cursorPos);
+                    this.selectionStart = cursorPos + 1;
+                    this.selectionEnd = cursorPos + 1;
+                } else {
+                    event.preventDefault();
+                    socket.emit("message", input.value);
+                }
+            }
+        })
+
+        socket.on("countofpeople",function(count){
+            document.querySelector(".no").innerHTML = count;
+        })
+
+        inptbtn.addEventListener("click",function(){
+            socket.emit("uname",inptname.value);
+        })
+        
+        socket.on("setnamedone",function(){
+            document.querySelector(".namedivv").style.display = "none";
+            document.querySelector(".sptg").innerHTML = inptname.value;
+        })
+
+        let container = ``;
+        socket.on("message", function (message) {
+            let myMessage = message.id === socket.id;
+            if (message.message != "") {
+                container = `<div class="mb-4 text-right">
+                    <div class="flex items-end ${myMessage ? 'justify-end' : 'justify-start'} ">
+                        <div class=" ${myMessage ? 'bg-blue-100' : 'bg-gray-300'} text-gray-900 p-2 ${myMessage ? 'rounded-l-lg rounded-br-lg' : 'rounded-r-lg rounded-bl-lg'} max-w-xs">
+                            <p>${message.name} : ${message.message}</p>
+                        </div>
+                    </div>
+                </div>`
+                messages.innerHTML += container;
+                messages.scrollTop = messages.scrollHeight;
+                input.value = "";
+            }
+        })
+
+    </script>
+</body>
+
+</html>
