@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat UI</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
     <style>
         .inputs {
             position: absolute;
@@ -26,30 +27,41 @@
 </head>
 
 <body class="bg-blue-100 flex items-center justify-center h-screen">
-    <div class="namedivv h-screen w-full fixed bg-white">
+    <div class="namedivv h-screen w-full fixed bg-white absolute z-10">
         <div class="inputs">
             <input type="text" placeholder="Enter Your Name" required name="uname"
                 class="nameinpt px-5 py-2 rounded-md" />
             <input type="button" value="Submit" class="namebtn font-semibold mt-2 px-5 py-2 rounded-xl bg-blue-100" />
         </div>
     </div>
-    <div class="w-10/12">
+    <div class="w-10/12 relative">
+        <div class="onlineusers hidden">
+            <div
+                class="h-full w-80 bg-blue-400 absolute right-0 rounded-r-lg p-4 flex flex-col gap-4 items-center overflow-y-auto text-white">
+                <div class="bg-blue-300 h-6 w-6 rounded-lg flex justify-center items-center text-white">
+                    <i class="closebtn ri-close-large-line"></i>
+                </div>
+            </div>
+        </div>
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             <div class="bg-blue-500 p-4 flex justify-between align-center">
                 <div class="flex gap-4 items-center">
                     <h2 class="text-white text-3xl">Chat Room</h2>
                     <div class="namediv">
                         <h2 class="text-white text-lg">
-                            <span class="no text-black font-semibold">${number}</span> are live.
+                            <span class="no text-black font-semibold"></span> are live.
                         </h2>
                     </div>
                 </div>
                 <h3 class="typing italic text-sm opacity-50 tracking-tight"></h3>
-                <div class="namediv">
+                <div class="namediv flex gap-2 items-center">
                     <h2 class="text-white text-lg">
-                        <span class="sptg text-black font-semibold">${uname}</span> is chatting. <a href="/"
+                        <span class="sptg text-black font-semibold"></span> is chatting. <a href="/"
                             class="reset px-4 py-1 bg-red-900 text-white rounded-lg">reset</a>
                     </h2>
+                    <div class="bg-blue-400 h-6 w-6 rounded-lg flex justify-center items-center text-white">
+                        <i class="openbtn ri-team-line text-lg"></i>
+                    </div>
                 </div>
             </div>
             <div class="messages p-4 h-96 overflow-y-auto">
@@ -79,7 +91,16 @@
         const messages = document.querySelector(".messages");
         const inptname = document.querySelector(".nameinpt");
         const inptbtn = document.querySelector(".namebtn");
+        const onlineusers = document.querySelector(".onlineusers");
+        const openbtn = document.querySelector(".openbtn");
+        const closebtn = document.querySelector(".closebtn");
 
+        openbtn.addEventListener("click", function () {
+            onlineusers.style.display = "block";
+        })
+        closebtn.addEventListener("click", function () {
+            onlineusers.style.display = "none";
+        })
         input.addEventListener("input", function (e) {
             socket.emit("typing");
         })
@@ -87,9 +108,9 @@
         socket.on("typing", function (name) {
             document.querySelector(".typing").textContent = `${name.name} is typing...`;
             clearTimeout(timer);
-            timer = setTimeout(function(){
+            timer = setTimeout(function () {
                 document.querySelector(".typing").textContent = "";
-            },1200);
+            }, 1200);
         })
 
         document.querySelector(".send").addEventListener("click", function () {
@@ -110,7 +131,8 @@
         })
 
         socket.on("countofpeople", function (count) {
-            document.querySelector(".no").innerHTML = count;
+            document.querySelector(".no").innerHTML = count.length;
+            
         })
 
         inptbtn.addEventListener("click", function () {

@@ -24,7 +24,14 @@ io.on("connection",function(socket){
         unames.push(name);
         userids.push(socket.id);
         socket.emit("setnamedone");
-        io.emit("countofpeople",unames.length);
+        io.emit("countofpeople",unames);console.log("Server started on port 3000");
+console.log("Socket.io connection established");
+console.log("User connected with id: ", socket.id);
+console.log("User disconnected with id: ", socket.id);
+console.log("User sent message: ", message);
+console.log("User is typing...");
+console.log("User set name: ", name);
+console.log("User count updated: ", unames.length);
     })
     socket.on("disconnect",function(){
         let index = userids.indexOf(socket.id);
